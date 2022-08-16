@@ -1,0 +1,25 @@
+--In this SQL code, I'm querying a database that has information about astronauts to answer some questions about the data
+
+--what are the top 10 undergraduate majors for astronauts?
+SELECT COUNT(name) as total_astronauts,undergraduate_major FROM astronauts GROUP BY undergraduate_major
+ORDER BY COUNT(name) DESC LIMIT 10;
+
+--who has the most hours doing space walks?
+SELECT name, MAX(space_walks_hr) FROM astronauts;
+
+--which astronauts have died on a mission?
+SELECT name FROM astronauts WHERE death_mission IS NOT NULL;
+
+--make a new column. rank the astronauts as advanced, intermediate, beginner, and no experience, based on space flight hours
+SELECT name,
+CASE
+WHEN space_flight_hr >=3000 THEN 'Advanced'
+WHEN space_flight_hr >=500 THEN 'Intermediate'
+WHEN space_flight_hr >=1 THEN 'Beginner'
+ELSE 'No Experience' 
+END AS space_flight_rank
+FROM astronauts;
+
+--find out the names of the astronauts who majored in physics AND are either currently in the air force or retired from the air force
+SELECT name FROM astronauts
+WHERE undergraduate_major = 'Physics' AND military_branch LIKE '%Air Force%';
