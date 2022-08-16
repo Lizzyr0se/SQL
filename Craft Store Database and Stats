@@ -1,0 +1,32 @@
+--create craft store database
+CREATE TABLE store (id INTEGER PRIMARY KEY, item TEXT, price INTEGER, quantity INTEGER, aisle INTEGER);
+INSERT INTO store VALUES (1, "Paint", 2.00, 52, 1);
+INSERT INTO store VALUES (2, "Yarn", 5.00, 97, 4);
+INSERT INTO store VALUES (3, "Markers", 4.00, 23, 2);
+INSERT INTO store VALUES (4, "Crayons", 3.00, 52, 2);
+INSERT INTO store VALUES (5, "Pencils", 5.00, 31, 2);
+INSERT INTO store VALUES (6, "Buttons", .50, 80, 5);
+INSERT INTO store VALUES (7, "Sewing Needles", 1.00, 22, 3);
+INSERT INTO store VALUES (8, "Scissors", 3.00, 18, 3);
+INSERT INTO store VALUES (9, "Glue", 1.00, 41, 5);
+INSERT INTO store VALUES (10, "Ribbon", 1.50, 64, 3);
+INSERT INTO store VALUES (11, "Picture Frames", 4.00, 48, 6);
+INSERT INTO store VALUES (12, "String", 2.00, 53, 4);
+INSERT INTO store VALUES (13, "Felt", 1.00, 85, 5);
+INSERT INTO store VALUES (14, "Thread", .50, 35, 3);
+INSERT INTO store VALUES (15, "Stretched Canvas", 9.00, 19, 1);
+
+--display database ordered by price
+SELECT * FROM store ORDER BY price;
+
+--how much money, per item, is sitting on the shelves?
+SELECT item, SUM(price*quantity) AS total FROM store GROUP BY item ORDER BY total DESC;
+
+--how many total items are sitting on the shelves in aisle 5?
+SELECT SUM(quantity) AS totel_items FROM store WHERE aisle=5;
+
+--find the average price, rounded to 2 decimal places
+SELECT ROUND(AVG(price),2) FROM store;
+
+--which 5 items have the highest quantity?
+SELECT item, quantity FROM store ORDER BY quantity DESC LIMIT 5;
