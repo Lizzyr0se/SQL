@@ -1,0 +1,19 @@
+-- In this project, I performed analytics on a Spotify database using SQL
+
+--what is the average popularity, danceability, and energy by artist and track? 
+SELECT artist_name, track_name, AVG(popularity), AVG(danceability), AVG(energy)
+FROM spotifydata
+GROUP BY artist_name, track_name;
+
+--who are the top 10 artists based on popularity?
+SELECT artist_name, popularity
+FROM spotifydata
+ORDER BY popularity DESC, artist_name ASC
+LIMIT 10;
+
+--what artist released the longest song? 
+SELECT artist_name
+FROM spotifydata
+WHERE duration_ms = 
+(SELECT MAX(duration_ms) FROM spotifydata);
+
