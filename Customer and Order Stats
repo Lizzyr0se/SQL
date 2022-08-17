@@ -1,0 +1,37 @@
+--In this SQL, I am querying a database with multiple tables to quantify statistics about customer and order data
+
+--how many orders were placed in january?
+SELECT COUNT(orderid) FROM jansales;
+
+--how many of the above orders were for an iphone?
+SELECT COUNT(orderid) FROM jansales WHERE product='iphone';
+
+--select customer account numbers for all orders placed in february
+SELECT c.acctnum
+FROM customers AS c
+INNER JOIN febsales AS f
+ON c.order_id=f.orderid;
+
+--what was the cheapest product sold in january, and what was the price?
+SELECT DISTINCT product, price
+FROM jansales
+WHERE price=
+(SELECT MIN(price) FROM jansales);
+
+--what is the total revenue for each product sold in january?
+SELECT product, SUM(quantity)*price AS total_revenue
+FROM jansales
+GROUP BY product;
+
+-- which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
+SELECT product, SUM(quantity), SUM(quantity)*price AS total_renevue
+FROM febsales
+WHERE location='548 Lincoln St, Seattle, WA 98101'
+GROUP BY product;
+
+--how many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers
+SELECT COUNT(c.acctnum) AS customers, AVG(f.quantity*f.price) AS average_revenue
+FROM customers AS c
+JOIN febsales AS f
+ON c.order_id=f.orderid
+WHERE f.quantity>2;
