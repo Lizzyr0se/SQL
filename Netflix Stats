@@ -2,7 +2,7 @@
 --written in the Postgres dialect
 
 --how many movie titles are there in the database? (movies only, not tv shows) 
-SELECT COUNT(type) FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+SELECT COUNT(title) FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
 WHERE type='Movie';
 
 -- when was the most recent batch of tv shows and/or movies added to the database? 
