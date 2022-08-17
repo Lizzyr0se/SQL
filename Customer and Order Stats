@@ -35,3 +35,9 @@ FROM customers AS c
 JOIN febsales AS f
 ON c.order_id=f.orderid
 WHERE f.quantity>2;
+
+--list all the products sold in los angeles in february, and include how many of each were sold.
+SELECT product, SUM(quantity) AS total_sold
+FROM febsales
+WHERE location LIKE '%Los Angeles%'
+GROUP BY product;
