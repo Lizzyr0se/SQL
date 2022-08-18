@@ -246,3 +246,36 @@ POWER(MAX(lat_n)-MIN(lat_n),2)
 ),4)
 FROM station;
 
+--BASIC JOIN CHALLENGES
+
+--Population Census
+SELECT SUM(city.population)
+FROM city
+JOIN country
+ON city.countrycode=country.code
+WHERE country.continent='Asia';
+
+–-African Cities
+SELECT city.name
+FROM city
+JOIN country
+ON city.countrycode=country.code
+WHERE country.continent='Africa';
+
+–-Average Population of Each Continent
+SELECT country.continent, FLOOR(AVG(city.population))
+FROM country
+JOIN city
+ON country.code=city.countrycode
+GROUP BY country.continent;
+
+–-The Report
+SELECT CASE
+WHEN grade<8 then 'NULL'
+ELSE s.name
+END AS 'Name', 
+g.grade, s.marks
+FROM students AS s
+JOIN grades AS g
+ON s.marks BETWEEN g.min_mark AND g.max_mark
+ORDER BY g.grade DESC, s.name ASC;
