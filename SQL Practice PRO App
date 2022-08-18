@@ -1,0 +1,52 @@
+--SELECT Introduction
+SELECT *
+FROM salaries;
+
+--SELECT Introduction
+SELECT professor_name
+FROM salaries;
+
+--DISTINCT
+SELECT DISTINCT department
+FROM salaries;
+
+--WHERE
+SELECT COUNT(professor_name)
+FROM salaries
+WHERE salary>150000;
+
+--GROUP BY
+SELECT department, SUM(salary)
+FROM salaries
+GROUP BY department;
+
+--MAX
+SELECT professor_name, MAX(salary)
+FROM salaries;
+
+--MAX
+SELECT professor_name, MAX(salary)
+FROM salaries
+WHERE department = 'Computer Science';
+
+--ORDER BY, LIMIT
+SELECT professor_name, salary
+FROM salaries
+ORDER BY salary DESC
+LIMIT 5;
+
+--MIN
+SELECT professory_name, MIN(salary)
+FROM salaries;
+
+--WHERE
+SELECT department
+FROM salaries
+WHERE professor_name = 'Zaniolo';
+
+--LIKE
+SELECT professor_name
+FROM salaries
+WHERE professor_name LIKE 'c%';
+
+
