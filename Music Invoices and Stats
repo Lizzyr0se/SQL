@@ -1,3 +1,5 @@
+--In this SQL, I am using the chinook database
+
 --query customers' full name, customer ID, and country who are not in the US
 SELECT firstname, lastname, customerid, country
 FROM customers
