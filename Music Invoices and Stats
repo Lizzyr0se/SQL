@@ -104,4 +104,4 @@ LIMIT 1;
 SELECT e.firstname || ' ' || e.lastname AS employee_name, e.employeeid, m.firstname || ' ' || m.lastname AS manager_name, m.employeeid
 FROM employees AS e
 JOIN employees AS m
-ON e.reportsto=m.employeeid
+ON e.reportsto=m.employeeid;
