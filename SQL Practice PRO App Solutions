@@ -1,52 +1,84 @@
---SELECT Introduction
+--From the SQL Practice PRO app
+
+
+--1.SELECT Introduction
+
 SELECT *
 FROM salaries;
 
---SELECT Introduction
+
+--2.SELECT Introduction
+
 SELECT professor_name
 FROM salaries;
 
---DISTINCT
+
+--3.DISTINCT
+
 SELECT DISTINCT department
 FROM salaries;
 
---WHERE
+
+--4.WHERE
+
 SELECT COUNT(professor_name)
 FROM salaries
 WHERE salary>150000;
 
---GROUP BY
+
+--5.GROUP BY
+
 SELECT department, SUM(salary)
 FROM salaries
 GROUP BY department;
 
---MAX
+
+--6.MAX
+
 SELECT professor_name, MAX(salary)
 FROM salaries;
 
---MAX
+
+--7.MAX
+
 SELECT professor_name, MAX(salary)
 FROM salaries
 WHERE department = 'Computer Science';
 
---ORDER BY, LIMIT
+
+--8.ORDER BY, LIMIT
+
 SELECT professor_name, salary
 FROM salaries
 ORDER BY salary DESC
 LIMIT 5;
 
---MIN
+
+--9.MIN
+
 SELECT professory_name, MIN(salary)
 FROM salaries;
 
---WHERE
+
+--10.WHERE
+
 SELECT department
 FROM salaries
 WHERE professor_name = 'Zaniolo';
 
---LIKE
+
+--11.LIKE
+
 SELECT professor_name
 FROM salaries
 WHERE professor_name LIKE 'c%';
 
+
+--12.DISTICT, ORDER BY, LIMIT
+
+SELECT DISTINCT salary
+FROM salaries
+ORDER BY salary DESC
+LIMIT 1
+OFFSET 2;
 
