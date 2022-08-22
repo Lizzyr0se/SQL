@@ -1,43 +1,55 @@
 -- In this project, I performed analytics on a Spotify database using SQL
 
+
 --what is the average popularity, danceability, and energy by artist and track? 
+
 SELECT artist_name, track_name, AVG(popularity), AVG(danceability), AVG(energy)
 FROM spotifydata
 GROUP BY artist_name, track_name;
 
+
 --who are the top 10 artists based on popularity?
+
 SELECT artist_name, popularity
 FROM spotifydata
 ORDER BY popularity DESC, artist_name ASC
 LIMIT 10;
 
+
 --what artist released the longest song? 
+
 SELECT artist_name
 FROM spotifydata
 WHERE duration_ms = 
 (SELECT MAX(duration_ms) FROM spotifydata);
 
+
 --what is the average danceability for the 10 most popular songs?
+
 SELECT track_name, AVG(danceability)
 FROM spotifydata
 GROUP BY track_name
 ORDER BY popularity DESC
 LIMIT 10;
 
+
 --what artist has the loudest song?
+
 SELECT artist_name
 FROM spotifydata
 WHERE loudness =
 (SELECT MAX(loudness) FROM spotifydata);
 
+
 --create cte to calculate average popularity by artist. 
 --query your cte to find artists with an average popularity of 90 or more.
 --show their name, average popularity, and label them as a 'Top Star'
+
 WITH avg_pop_cte AS
 (SELECT artist_name, AVG(popularity) AS avg_pop
 FROM spotifydata
-GROUP BY artist_name)
+GROUP BY artist_name);
 
 SELECT artist_name, avg_pop, 'Top Star' AS tag
 FROM avg_pop_cte
-WHERE avg_pop>90
+WHERE avg_pop>90;
