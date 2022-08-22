@@ -1,48 +1,59 @@
 --BASIC SELECT CHALLENGES
 
+
 --Revising the Select Query 1
+
 SELECT * 
 FROM city 
 WHERE population > 100000 AND Countrycode ="USA";
 
 --Revising the Select Query 2
+
 SELECT name
 FROM city
 WHERE population > 120000 and Countrycode = "USA"
 
 --Select All
+
 Select * 
 FROM city
 
 --Select by ID
+
 SELECT * 
 FROM city 
 WHERE ID=1661;
 
 --Japanese Cities' Attributes
+
 SELECT * 
 FROM city 
 WHERE countrycode="JPN"
 
 --Japanese Cities' Names
+
 SELECT name 
 FROM city 
 WHERE CountryCode="JPN";
 
 --Weather Observation Station 1
+
 SELECT city, state 
 FROM station;
 
 --Weather Observation Station 3
+
 SELECT DISTINCT city 
 FROM station 
 WHERE ID%2=0;
 
 --Weather Observation Station 4
+
 SELECT COUNT(city) - COUNT(distinct city) 
 FROM station;
 
 --Weather Observation Station 5
+
 SELECT city, LENGTH(city)
 FROM station
 ORDER BY LENGTH(city) ASC, city ASC LIMIT 1;
@@ -51,6 +62,7 @@ FROM station
 ORDER BY LENGTH(city) DESC, city ASC LIMIT 1;
 
 --Weather Observation Station 6
+
 SELECT DISTINCT city 
 FROM station 
 WHERE city LIKE "a%" 
@@ -60,6 +72,7 @@ OR city LIKE "o%"
 OR city LIKE "u%";
 
 --Weather Observation Station 7
+
 SELECT DISTINCT city 
 FROM station 
 WHERE city LIKE "%a" 
@@ -69,6 +82,7 @@ OR city LIKE "%o"
 OR city LIKE "%u";
 
 --Weather Observation Station 8
+
 SELECT DISTINCT city 
 SELECT city
 FROM station
@@ -76,6 +90,7 @@ WHERE LEFT(city,1) IN ('a','e','i','o','u')
 AND RIGHT(city,1) IN ('a','e','i','o','u');
 
 --Weather Observation Station 9
+
 SELECT DISTINCT city 
 FROM station 
 WHERE city NOT LIKE "a%" 
@@ -85,6 +100,7 @@ AND city NOT LIKE "o%"
 AND city NOT LIKE "u%";
 
 --Weather Observation Station 10
+
 SELECT DISTINCT city 
 FROM station 
 WHERE city NOT LIKE "%a" 
@@ -94,38 +110,46 @@ AND city NOT LIKE "%o"
 AND city NOT LIKE "%u";
 
 --Weather Observation Station 11
+
 SELECT DISTINCT city
 FROM station
 WHERE LEFT(city,1) NOT IN('a','e','i','o','u')
 OR RIGHT(city,1) NOT IN('a','e','i','o','u');
 
 --Weather Observation Station 12
+
 SELECT DISTINCT city
 FROM station
 WHERE LEFT(city,1) NOT IN('a','e','i','o','u')
 AND RIGHT(city,1) NOT IN('a','e','i','o','u');
 
 --Higher Than 75 Marks
+
 SELECT name
 FROM students
 WHERE marks>75
 ORDER BY RIGHT(name,3),id ASC;
 
 --Employee Names
+
 SELECT name
 FROM employee
 ORDER BY name ASC;
 
 --Employee Salaries
+
 SELECT name 
 FROM employee 
 WHERE salary > 2000 
 AND months < 10 
 ORDER BY employee_id ASC;
 
+
 --ADVANCED SELECT CHALLENGES
 
+
 --Type of Triangle
+
 SELECT
 CASE
 WHEN A+B<=C OR A+C<=B OR B+C<=A THEN 'Not A Triangle'
@@ -136,6 +160,7 @@ END AS triangle_type
 FROM triangles;
 
 --The PADS
+
 SELECT CONCAT(name,'(',LEFT(occupation,1),')')
 FROM occupations
 ORDER BY name ASC;
@@ -145,6 +170,7 @@ GROUP BY occupation
 ORDER BY COUNT(occupation) ASC, occupation ASC;
 
 --New Companies
+
 SELECT c.company_code, c.founder, COUNT(DISTINCT lm.lead_manager_code), COUNT(DISTINCT sm.senior_manager_code), COUNT(DISTINCT m.manager_code), COUNT(DISTINCT e.employee_code)
 FROM company AS c
 JOIN lead_manager AS lm
@@ -158,73 +184,89 @@ ON c.company_code=e.company_code
 GROUP BY c.company_code, c.founder
 ORDER BY c.company_code ASC;
 
+
 --AGGREGATION CHALLENGES
 
+
 --Revising Aggregations - The Count Function
+
 SELECT COUNT(name) 
 FROM city 
 WHERE population > 100000;
 
 --Revising Aggregations - The Sum Function
+
 SELECT SUM(population)
 FROM city
 WHERE district = 'California';
 
 --Revising Aggregations - Averages
+
 SELECT AVG(population)
 FROM city
 WHERE district ='California';
 
 --Average Population
+
 SELECT FLOOR(AVG(population))
 FROM city;
 
 --Japan Population
+
 SELECT SUM(population)
 FROM city
 WHERE countrycode ='JPN';
 
 --Population Density Difference
+
 SELECT MAX(population) - MIN(population)
 FROM city;
 
 --The Blunder
+
 SELECT CEIL(AVG(salary)-AVG(REPLACE(salary,'0','')))
 FROM employees;
 
 --Top Earners
+
 SELECT (months*salary) AS earnings, COUNT(employee_id)
 FROM employee
 GROUP BY earnings
 ORDER BY earnings DESC 
 LIMIT 1;
 
---Weather Oberservation Station 2
+--Weather Observation Station 2
+
 SELECT ROUND(SUM(lat_n),2), ROUND(SUM(long_w),2)
 FROM station;
 
---Weather Oberservation Station 13
+--Weather Observation Station 13
+
 SELECT ROUND(SUM(lat_n),4)
 FROM station 
 WHERE lat_n>38.7880 AND lat_n<137.2345;
 
---Weather Oberservation Station 14
+--Weather Observation Station 14
+
 SELECT ROUND(MAX(lat_n),4)
 FROM station
 WHERE lat_n<137.2345;
 
---Weather Oberservation Station 15
+--Weather Observation Station 15
+
 SELECT ROUND(long_w,4)
 FROM station
 WHERE lat_n=(SELECT MAX(lat_n) 
 FROM station WHERE lat_n < 137.2345);
 
---Weather Oberservation Station 16
+--Weather Observation Station 16
+
 SELECT ROUND(MIN(lat_n),4)
 FROM station
 WHERE lat_n > 38.7780;
 
---Weather Oberservation Station 17
+--Weather Observation Station 17
+
 SELECT ROUND(long_w,4)
 FROM station
 WHERE lat_n=
@@ -232,23 +274,35 @@ WHERE lat_n=
 FROM station
 WHERE lat_n>38.7780);
 
---Weather Oberservation Station 18
+--Weather Observation Station 18
+
 SELECT ROUND(ABS
 (MIN(lat_n)-MAX(lat_n))
 +ABS(MIN(long_w)-MAX(long_w))
 ,4)
 FROM station;
 
---Weather Oberservation Station 19
+--Weather Observation Station 19
+
 SELECT ROUND(SQRT(
 POWER(MAX(lat_n)-MIN(lat_n),2)
 +POWER(MAX(long_w)-MIN(long_w),2)
 ),4)
 FROM station;
 
+--Weather Observation Station 20
+
+SELECT ROUND(lat_n,4)
+FROM station AS st
+WHERE (SELECT COUNT(lat_n) FROM station WHERE lat_n>st.lat_n)
+=(SELECT COUNT(lat_n) FROM station WHERE lat_n<st.lat_n);
+
+
 --BASIC JOIN CHALLENGES
 
+
 --Population Census
+
 SELECT SUM(city.population)
 FROM city
 JOIN country
@@ -256,6 +310,7 @@ ON city.countrycode=country.code
 WHERE country.continent='Asia';
 
 –-African Cities
+
 SELECT city.name
 FROM city
 JOIN country
@@ -263,6 +318,7 @@ ON city.countrycode=country.code
 WHERE country.continent='Africa';
 
 –-Average Population of Each Continent
+
 SELECT country.continent, FLOOR(AVG(city.population))
 FROM country
 JOIN city
@@ -270,6 +326,7 @@ ON country.code=city.countrycode
 GROUP BY country.continent;
 
 –-The Report
+
 SELECT CASE
 WHEN grade<8 then 'NULL'
 ELSE s.name
@@ -279,3 +336,34 @@ FROM students AS s
 JOIN grades AS g
 ON s.marks BETWEEN g.min_mark AND g.max_mark
 ORDER BY g.grade DESC, s.name ASC;
+
+--Top Competitors
+
+SELECT h.hacker_id, h.name
+FROM hackers AS h
+JOIN submissions AS s
+ON h.hacker_id=s.hacker_id
+JOIN challenges AS c
+ON (c.challenge_id=s.challenge_id)
+JOIN difficulty AS d
+ON d.difficulty_level=c.difficulty_level
+WHERE d.score=s.score
+GROUP BY h.hacker_id, h.name
+HAVING COUNT(s.hacker_id)>1
+ORDER BY COUNT(h.hacker_id) DESC, h.hacker_id ASC;
+
+--Ollivander's Inventory
+
+SELECT w.id, wp.age, w.coins_needed, w.power
+FROM wands AS w
+JOIN wands_property AS wp
+ON w.code=wp.code
+WHERE wp.is_evil=0
+AND w.coins_needed=
+(SELECT MIN(w2.coins_needed) 
+ FROM wands AS w2
+ JOIN wands_property AS wp2
+ ON w2.code=wp2.code
+ WHERE w.power=w2.power AND wp.age=wp2.age)
+ORDER BY power DESC, age DESC;
+
