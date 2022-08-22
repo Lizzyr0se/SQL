@@ -1,4 +1,5 @@
---create three tables about famous people and what they do
+--create three tables about different aspects of famous people
+
 
 CREATE TABLE actors (id INTEGER PRIMARY KEY, name TEXT, age INTEGER);
 INSERT INTO actors VALUES (1, "Blake Lively", 34);
@@ -21,15 +22,20 @@ INSERT INTO married VALUES (1,2);
 INSERT INTO married VALUES (3,4);
 INSERT INTO married VALUES (5,6);
 
+
 --join two tables to tell which famous person is in which movie
-SELECT actors.name, movie.title FROM actors
-    JOIN movie
-    ON actors.id = movie.id;
+
+SELECT actors.name, movie.title 
+FROM actors
+JOIN movie
+ON actors.id = movie.id;
+
 
 --use self join to show which actors are married to each other
+
 SELECT actors.name, spouse.name 
-    FROM married
-    JOIN actors 
-    ON married.id = actors.id
-    JOIN actors spouse
-    ON married.spouse = spouse.id;
+FROM married
+JOIN actors 
+ON married.id = actors.id
+JOIN actors AS spouse
+ON married.spouse = spouse.id;
