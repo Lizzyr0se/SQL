@@ -16,17 +16,38 @@ INSERT INTO store VALUES (13, "Felt", 1.00, 85, 5);
 INSERT INTO store VALUES (14, "Thread", .50, 35, 3);
 INSERT INTO store VALUES (15, "Stretched Canvas", 9.00, 19, 1);
 
+
 --display database ordered by price
-SELECT * FROM store ORDER BY price;
+
+SELECT * 
+FROM store 
+ORDER BY price;
+
 
 --how much money, per item, is sitting on the shelves?
-SELECT item, SUM(price*quantity) AS total FROM store GROUP BY item ORDER BY total DESC;
+
+SELECT item, SUM(price*quantity) AS total 
+FROM store 
+GROUP BY item 
+ORDER BY total DESC;
+
 
 --how many total items are sitting on the shelves in aisle 5?
-SELECT SUM(quantity) AS totel_items FROM store WHERE aisle=5;
+
+SELECT SUM(quantity) AS totel_items 
+FROM store 
+WHERE aisle=5;
+
 
 --find the average price, rounded to 2 decimal places
-SELECT ROUND(AVG(price),2) FROM store;
+
+SELECT ROUND(AVG(price),2) 
+FROM store;
+
 
 --which 5 items have the highest quantity?
-SELECT item, quantity FROM store ORDER BY quantity DESC LIMIT 5;
+
+SELECT item, quantity 
+FROM store 
+ORDER BY quantity DESC 
+LIMIT 5;
