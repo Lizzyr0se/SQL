@@ -1,73 +1,102 @@
 --In this SQL, I am querying a database with multiple tables to quantify statistics about customer and order data
 
+
 --how many orders were placed in january?
-SELECT COUNT(orderid) FROM jansales;
+
+SELECT COUNT(orderid) 
+FROM jansales;
+
 
 --how many of the above orders were for an iphone?
-SELECT COUNT(orderid) FROM jansales WHERE product='iphone';
+
+SELECT COUNT(orderid) 
+FROM jansales 
+WHERE product='iphone';
+
 
 --select customer account numbers for all orders placed in february
+
 SELECT c.acctnum
 FROM customers AS c
 INNER JOIN febsales AS f
 ON c.order_id=f.orderid;
 
+
 --what was the cheapest product sold in january, and what was the price?
+
 SELECT DISTINCT product, price
 FROM jansales
 WHERE price=
 (SELECT MIN(price) FROM jansales);
 
+
 --what is the total revenue for each product sold in january?
+
 SELECT product, SUM(quantity)*price AS total_revenue
 FROM jansales
 GROUP BY product;
 
+
 -- which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
+
 SELECT product, SUM(quantity), SUM(quantity)*price AS total_renevue
 FROM febsales
 WHERE location='548 Lincoln St, Seattle, WA 98101'
 GROUP BY product;
 
---how many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers
+
+--how many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
+
 SELECT COUNT(c.acctnum) AS customers, AVG(f.quantity*f.price) AS average_revenue
 FROM customers AS c
 JOIN febsales AS f
 ON c.order_id=f.orderid
 WHERE f.quantity>2;
 
+
 --list all the products sold in los angeles in february, and include how many of each were sold.
+
 SELECT product, SUM(quantity) AS total_sold
 FROM febsales
 WHERE location LIKE '%Los Angeles%'
 GROUP BY product;
 
+
 --which locations in new york received at least 3 orders in january, and how many orders did they each receive?
+
 SELECT location, COUNT(orderid) AS total_orders
 FROM jansales
 WHERE location LIKE '%NY%'
 GROUP BY location
 HAVING COUNT(orderid)>2;
 
+
 --how many of each type of headphone were sold in february?
+
 SELECT product, SUM(quantity) AS total_sold
 FROM febsales 
 WHERE product LIKE '%Headphone%'
 GROUP BY product;
 
+
 --what was the average amount spent per account in february?
+
 SELECT SUM(quantity*price)/COUNT(acctnum) AS avg_spent
 FROM febsales AS f
 JOIN customers AS c
 ON f.orderid=c.order_id;
 
+
 --what was the average quantity of products purchased per account in february?
+
 SELECT SUM(quantity)/COUNT(acctnum) AS avg_product
 FROM febsales AS f
 JOIN customers AS c
 ON f.orderid=c.order_id;
 
+
 --which product brought in the most revenue in january and how much revenue did it bring in total?
+
 SELECT product, SUM(quantity*price) AS revenue
 FROM jansales
 GROUP BY product
