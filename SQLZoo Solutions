@@ -1,0 +1,213 @@
+--Solutions for sqlzoo.net
+
+--SELECT basics
+
+
+--1.show the population of germany
+
+SELECT population 
+FROM world
+WHERE name = 'Germany';
+
+--2.show the name and population for sweden, norway, and denmark
+
+SELECT name, population 
+FROM world
+WHERE name IN ('Sweden', 'Norway', 'Denmark');
+
+--3.show the countries and the area for countries with an area between 200,000 and 250,000
+
+SELECT name, area 
+FROM world
+WHERE area BETWEEN 200000 AND 250000;
+
+
+--SELECT from WORLD
+
+
+--1.show the name, continent, and population
+
+SELECT name, continent, population 
+FROM world;
+
+--2.query the name for the countries that have a population of at least 200 million
+
+SELECT name 
+FROM world
+WHERE population >= 200000000;
+
+--3.query the name and the per capita gdp for countries with a population of at least 200 million
+
+SELECT name, gdp/population AS per_capita_gdp
+FROM world
+WHERE population >= 200000000;
+
+--4.query the name and population (in millions) for the countries in south america
+
+SELECT name, population/1000000
+FROM world
+WHERE continent = 'South America';
+
+--5.query the name and population for france, germany, and italy
+
+SELECT name, population
+FROM world
+WHERE name IN ('France','Germany','Italy');
+
+--6.show the countries that include ‘united’ in the name
+
+SELECT name
+FROM world
+WHERE name LIKE '%United%';
+
+--7.query the name, population, and area for countries that have an area of more than 3 million sq km or a population of more than 250 million
+
+SELECT name, population, area
+FROM world
+WHERE area > 3000000 
+OR population > 250000000;
+
+--8.show the name, population, and area of countries that have more than 3 million sq km or a population of more than 250 million, but not both.
+
+SELECT name, population, area
+FROM world
+WHERE (area > 3000000 OR population > 250000000)
+AND name NOT IN (SELECT name
+FROM world
+WHERE area > 3000000 
+AND population > 250000000);
+
+--9.query the name, population (in millions), and gdp (in billions) for all countries in south america -round to 2 decimal places
+
+SELECT name, ROUND(population/1000000,2), ROUND(gdp/1000000000,2)
+FROM world
+WHERE continent = 'South America';
+
+--10.query the name and per capita gdp for the countries with gdp of at least 1 trillion -round to nearest 1000
+
+SELECT name, ROUND(gdp/population,-3)
+FROM world
+WHERE gdp >=1000000000000;
+
+--11.show the name and capital where the name and the capital have the same number of characters
+
+SELECT capital, name
+FROM world
+WHERE LEN(name)=LEN(capital);
+
+--12.show the names and capitals that share the same first letter -do not include names and capitals that are the same word
+
+SELECT name, capital
+FROM world
+WHERE LEFT(name,1)=LEFT(capital,1) AND name <> capital;
+
+--13.show all the countries that contain all the vowels but no spaces in its name
+
+SELECT name
+FROM world
+WHERE name LIKE '%a%' 
+AND name LIKE '%e%'
+AND name LIKE '%i%'
+AND name LIKE '%o%'
+AND name LIKE '%u%'
+AND name NOT LIKE '% %';
+
+
+--SELECT from NOBEL
+
+
+--1.show the year, subject, and winner for the nobel prizes in 1950
+
+SELECT yr, subject, winner
+FROM nobel
+WHERE yr = 1950;
+
+--2.show the winner for the 1962 nobel prize in literature 
+
+SELECT winner
+FROM nobel
+WHERE yr = 1962
+AND subject = 'Literature';
+
+--3.show the year and subject that won albert einstein his prize
+
+SELECT yr, subject
+FROM nobel
+WHERE winner = 'Albert Einstein';
+
+--4.give the name of the 'peace' winners since the year 2000, including 2000 
+
+SELECT winner
+FROM nobel
+WHERE yr >= 2000
+AND subject = 'Peace';
+
+--5.query all details of the literature prize winners from 1980 to 1989 inclusive
+
+SELECT *
+FROM nobel
+WHERE subject = 'Literature'
+AND yr BETWEEN 1980 AND 1989;
+
+--6.query all details of the presidential winners (Theodore Roosevelt, Woodrow Wilson, Jimmy Carter, and Barack Obama)
+
+SELECT * 
+FROM nobel
+WHERE winner IN ('Theodore Roosevelt', 'Woodrow Wilson', 'Jimmy Carter', 'Barack Obama');
+
+--7.show the winners with the first name John 
+
+SELECT winner
+FROM nobel
+WHERE winner LIKE 'John%';
+
+--8.show the year, subject, and name of physics winners for 1980 together along with the chemistry winners for 1984
+
+SELECT yr, subject, winner
+FROM nobel
+WHERE (subject = 'Physics' AND yr = 1980)
+OR (subject = 'Chemistry' AND yr = 1984);
+
+--9.show the year, subject, and name of winners for 1980 excluding chemistry and medicine 
+
+SELECT yr, subject, winner
+FROM nobel
+WHERE yr = 1980
+AND subject NOT IN ('Chemistry', 'Medicine');
+
+--10.show the year, subject, and name of people who won a 'Medicine' prize in an early year (before 1910, not including 1910) together with winners of a 'Literature' prize in a later year (after 2004, including 2004)
+
+SELECT yr, subject, winner
+FROM nobel
+WHERE (subject = 'Medicine' AND yr < 1910)
+OR (subject = 'Literature' AND yr >= 2004);
+
+--Harder Questions
+
+--11.show all details of the prize won by PETER GRÜNBERG
+
+SELECT *
+FROM nobel
+WHERE winner = 'PETER GRÜNBERG';
+
+--12.show all details of the prize won by EUGENE O'NEILL 
+SELECT * 
+FROM nobel
+WHERE winner = 'EUGENE O''NEILL';
+
+--13.show the winners, year and subject where the winner starts with ‘Sir’. Show the most recent first, then by name order. 
+
+SELECT winner, yr, subject
+FROM nobel
+WHERE winner LIKE 'Sir%'
+ORDER BY yr DESC, winner ASC;
+
+--14.SHOW the 1984 winners and subject ordered by subject and winner name, but list chemistry and physics last 
+SELECT winner, subject
+FROM nobel
+WHERE yr=1984
+ORDER BY 
+CASE WHEN subject IN ('Physics','Chemistry') THEN 1 
+ELSE 0 END,
+subject,winner;
+
