@@ -672,6 +672,110 @@ END
 FROM teacher;
 
 
+--Numeric Examples --NSS Tutorial 
+
+
+--1.Show the the percentage who strongly agree with question 1 at 'Edinburgh Napier University' studying '(8) Computer Science'
+
+SELECT a_strongly_agree
+FROM nss
+WHERE question='Q01'
+AND institution='Edinburgh Napier University'
+AND subject='(8) Computer Science';
+
+--2.Show the institution and subject where the score is at least 100 for question 15. 
+
+SELECT institution, subject
+FROM nss
+WHERE question = 'Q15'
+AND score >= 100;
+
+--3.Show the institution and score where the score for '(8) Computer Science' is less than 50 for question 'Q15' 
+
+SELECT institution, score
+FROM nss
+WHERE score < 50
+AND question = 'Q15'
+AND subject = '(8) Computer Science';
+
+--4.Show the subject and total number of students who responded to question 22 for each of the subjects '(8) Computer Science' and '(H) Creative Arts and Design'
+
+SELECT subject, SUM(response)
+FROM nss
+WHERE question = 'Q22'
+AND subject IN ('(8) Computer Science','(H) Creative Arts and Design')
+GROUP BY subject';
+
+--5.Show the subject and total number of students who strongly agree to question 22 for each of the subjects '(8) Computer Science' and '(H) Creative Arts and Design'. 
+
+SELECT subject, SUM(a_strongly_agree*response/100)
+FROM nss
+WHERE question = 'Q22'
+AND subject IN ('(8) Computer Science','(H) Creative Arts and Design')
+GROUP BY subject;
+
+
+--Window functions
+
+
+--1.Show the last name, party, and votes for the constituency 'S14000024' in 2017 
+
+SELECT lastName, party, votes
+FROM ge
+WHERE constituency = 'S14000024' AND yr = 2017
+ORDER BY votes DESC;
+
+--2.Show the party and rank for constituency S14000024 in 2017. List the output by party
+
+SELECT party, votes,
+RANK () OVER (ORDER BY votes DESC) AS posn
+FROM ge
+WHERE constituency = 'S14000024'
+and YR = 2017
+ORDER BY party;
+
+--3.Show the ranking of each party in S14000021 in each year. Include yr, party, votes and ranking
+
+SELECT yr, party, votes,
+RANK() OVER (PARTITION BY yr ORDER BY votes DESC) AS posn
+FROM ge
+WHERE constituency = 'S14000021';
+
+--4.Show the ranking of each constituency numbered S14000021 to S14000026 in Edinburgh in 2017. Order your results so the winners are shown first, then ordered by constituency 
+ 
+SELECT constituency, party, votes,
+RANK () OVER (PARTITION BY constituency ORDER BY votes DESC) AS posn
+FROM ge
+WHERE yr = 2017
+AND constituency BETWEEN 'S14000021' AND 'S14000026'
+ORDER BY posn, constituency;
+
+--5.Show the parties that won for each Edinburgh constituency in 2017. 
+
+SELECT constituency, party
+FROM (
+SELECT constituency, party, votes,
+RANK() OVER (PARTITION BY constituency ORDER BY votes DESC) AS posn
+FROM ge
+WHERE constituency BETWEEN 'S14000021' AND 'S14000026'
+AND yr  = 2017
+)
+TAB WHERE posn = 1;
+
+--6.Show how many seats for each party in Scotland in 2017. 
+
+SELECT party, COUNT(constituency)
+FROM (
+SELECT party, constituency, votes,
+RANK () OVER (PARTITION BY constituency ORDER BY votes DESC) AS posn
+FROM ge
+WHERE constituency LIKE 'S%'
+AND yr = 2017
+)
+TAB WHERE posn = 1
+GROUP BY party;
+
+
 --Self Join
 
 
