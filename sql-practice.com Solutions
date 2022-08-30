@@ -22,7 +22,7 @@ SELECT first_name
 FROM patients
 WHERE first_name LIKE 'c%';
 
---4.Show first name and last name of patients that weight within the range of 100 to 120 
+--4.Show first name and last name of patients that weight within the range of 100 to 120.
 
 SELECT first_name, last_name
 FROM patients
@@ -32,7 +32,7 @@ WHERE weight BETWEEN 100 and 120;
 
 UPDATE patients
 SET allergies = 'NKA'
-where allergies IS NULL;
+WHERE allergies IS NULL;
 
 --6.Show first name and last name concatinated into one column to show their full name. 
 
@@ -44,7 +44,7 @@ FROM patients;
 SELECT first_name, last_name, province_name
 FROM patients
 JOIN provinces
-on patients.province_id=provinces.province_id;
+ON patients.province_id=provinces.province_id;
 
 --8.Show how many patients have a birth_date with 2010 as the birth year. 
 
@@ -78,25 +78,25 @@ WHERE admission_date=discharge_date;
 
 SELECT patient_id, count(*)
 FROM admissions
-where patient_id=573;
+WHERE patient_id=573;
 
 --14.Based on the cities that our patients live in, show unique cities that are in province_id 'NS'? 
 
 SELECT distinct city
 FROM patients
-where province_id = 'NS';
+WHERE province_id = 'NS';
 
 --15.Write a query to find the first_name, last name,  and birth date of patients who have height more than 160 and weight more than 70.
 
 SELECT first_name, last_name, birth_date
 FROM patients
-where height > 160
+WHERE height > 160
 AND weight > 70;
 
 --16.Write a query to find list of patients first_name, last_name, and allergies from Hamilton where allergies are not NKA.
 
 SELECT first_name, last_name, allergies
-from patients
-where city = 'Hamilton'
+FROM patients
+WHERE city = 'Hamilton'
 AND allergies <> 'NKA';
 
