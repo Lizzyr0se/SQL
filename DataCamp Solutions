@@ -617,3 +617,249 @@ FROM films 
 GROUP BY release_year, country 
 ORDER BY country, release_year;
 
+
+--HAVING a great time
+
+
+--1.In how many different years were more than 200 movies released? 
+
+WITH tempfilm AS(
+SELECT release_year
+FROM films
+GROUP BY release_year
+HAVING COUNT(title) > 200
+)
+
+SELECT COUNT(*)
+FROM tempfilm;
+
+--2.Get the release year, budget and gross earnings for each film in the films table. 
+
+SELECT release_year, budget, gross 
+FROM films;
+
+--3.Modify your query so that only records with a release_year after 1990 are included. 
+
+SELECT release_year, budget, gross
+FROM films
+WHERE release_year > 1990;
+
+--4.Remove the budget and gross columns, and group your results by release year. 
+
+SELECT release_year
+FROM films
+WHERE release_year > 1990
+GROUP BY release_year;
+
+--5.Modify your query to include the average budget and average gross earnings for the results you have so far. Alias the average budget as avg_budget; alias the average gross earnings as avg_gross.
+
+SELECT release_year, AVG (budget) AS avg_budget, AVG (gross) AS avg_gross
+FROM films
+WHERE release_year > 1990
+GROUP BY release_year;
+
+--6.Modify your query so that only years with an average budget of greater than $60 million are included. 
+
+SELECT release_year, AVG(budget) AS avg_budget, AVG(gross) AS avg_gross
+FROM films
+WHERE release_year > 1990
+GROUP BY release_year
+HAVING AVG(budget) > 60000000;
+
+--7.Finally, modify your query to order the results from highest average gross earnings to lowest. 
+
+SELECT release_year, AVG(budget) AS avg_budget, AVG(gross) AS avg_gross
+FROM films
+WHERE release_year > 1990
+GROUP BY release_year
+HAVING AVG(budget) > 60000000
+ORDER BY avg_gross DESC;
+
+
+--All together now
+
+
+--1.Get the country, average budget, and average gross take of countries that have made more than 10 films. Order the result by country name, and limit the number of results displayed to 5. You should alias the averages as avg_budget and avg_gross respectively. 
+
+SELECT country, AVG (budget) AS avg_budget, AVG(gross) AS avg_gross
+FROM films
+GROUP BY country 
+HAVING COUNT(title) > 10
+ORDER BY country
+LIMIT 5;
+
+--2. Get the movie title and imdb score for ‘To Kill a Mockingbird’.
+
+SELECT title, imdb_score
+FROM films
+JOIN reviews
+ON films.id = reviews.film_id
+WHERE title = 'To Kill a Mockingbird';
+
+
+--Inner join
+
+
+--1.Begin by selecting all columns from the cities table 
+
+SELECT *
+FROM cities;
+
+--2.Inner join the cities table on the left to the countries table on the right, keeping all of the fields in both tables.
+
+SELECT * 
+FROM cities
+INNER JOIN countries
+ON cities.country_code =countries.code;
+
+--3.Modify the SELECT statement to keep only the name of the city, the name of the country, and the name of the region the country resides in. Alias the name of the city AS city and the name of the country AS country.
+
+SELECT cities.name AS city, countries.name AS country, region
+FROM cities
+INNER JOIN countries
+ON cities.country_code = countries.code;
+
+
+--Inner join (2)
+
+
+--1.SELECT the country code, aliased as country_code along with the name, year, and inflation_rate from the countries and economies tables.
+
+SELECT c.code AS country_code, c.name, e.year, e.inflation_rate
+FROM countries AS c
+JOIN economies AS e
+ON c.code = e.code;
+
+
+--Inner join (3)
+
+
+--1.Get the code, name, region, year, and fertility rate from the countries and populations tables.
+
+SELECT c.code, c.name, c.region, p.year, p.fertility_rate
+FROM countries AS c
+JOIN populations AS p
+ON p.country_code=c.code;
+
+--2.Modify your query to include the unemployment_rate column from the economies table.
+
+SELECT c.code, name, region, e.year, fertility_rate, e.unemployment_rate
+FROM countries AS c
+INNER JOIN populations AS p
+ON c.code = p.country_code
+INNER JOIN economies AS e
+ON e.code = c.code;
+
+--3.Fix your previous query: in your last ON clause, use AND to add an additional joining condition. In addition to joining on code in c and e, also join on year in e and p.
+
+SELECT c.code, name, region, e.year, fertility_rate, unemployment_rate
+FROM countries AS c
+INNER JOIN populations AS p
+ON c.code = p.country_code
+INNER JOIN economies AS e
+ON e.code = c.code
+AND e.year = p.year;
+
+--Why does the following code result in an error? INNER JOIN requires a specification of the key field (or fields) in each table. 
+
+
+--Inner join with using
+
+
+--1.Select the country name AS country, continent name, language name AS language, and whether or not the language is official.
+
+SELECT c.name AS country, continent, l.name AS language, official
+FROM countries AS c
+JOIN languages AS l 
+USING (code);
+
+
+--Self-join
+
+
+--1.Join populations with itself. Select the country_code from p1 , p1.size as size 2010 and p2.size as size2015.
+
+SELECT p1.country_code, p1.size AS size2010, p2.size AS size2015
+FROM populations AS p1
+JOIN populations AS p2
+USING (country_code);
+
+--2.Extend the ON in your query to include only those records where the p1.year matches with p2.year - 5. 
+
+SELECT p1.country_code, p1.size AS size2010, p2.size AS size2015
+FROM populations as p1
+JOIN populations as p2
+ON p1.country_code=p2.country_code
+AND p1.year=p2.year-5;
+
+--3.Add a new field to SELECT, aliased as growth_perc, that calculates the percentage population growth from 2010 to 2015 for each country.
+
+SELECT p1.country_code, p1.size AS size2010, p2.size AS size2015, ((p2.size-p1.size)/p1.size)*100 AS growth_perc
+FROM populations AS p1
+INNER JOIN populations AS p2
+ON p1.country_code = p2.country_code
+AND p1.year = p2.year - 5;
+
+
+--Case when and then
+
+
+--1. Select name, continent, code, surface_area, and Create a new field AS geosize_group  If surface_area is greater than 2 million, geosize_group is 'large'. If surface_area is greater than 350 thousand, geosize_group is 'medium'. Otherwise, geosize_group is 'small'.
+
+SELECT name, continent, code, surface_area,
+CASE
+WHEN surface_area > 2000000 THEN 'large'
+WHEN surface_area > 350000 THEN 'medium'
+ELSE 'small'
+END AS geosize_group
+FROM countries;
+
+
+--Inner challenge
+
+
+--1.Select the country code, population size, and create a new field aliased as popsize_group to organize population size into 'large' (> 50 million), 'medium' (> 1 million), and 'small' groups focused on the year 2015.
+
+SELECT country_code, size,
+CASE
+WHEN size > 50000000 THEN 'large'
+WHEN size > 1000000 THEN 'medium'
+ELSE 'small'
+END AS popsize_group
+FROM populations
+WHERE year = 2015;
+
+--2.Use INTO to save the result of the previous query as pop_plus. Then display all the records in pop_plus.
+
+SELECT country_code, size,
+CASE WHEN size > 50000000 THEN 'large'
+WHEN size > 1000000 THEN 'medium'
+ELSE 'small' END AS popsize_group
+INTO pop_plus
+FROM populations
+WHERE year = 2015;
+
+SELECT *
+FROM pop_plus;
+
+--3.Select the name, continent, geosize_group, and popsize_group fields. Sort the data based on geosize_group. 
+
+SELECT country_code, size,
+CASE WHEN size > 50000000
+THEN 'large'
+WHEN size > 1000000
+THEN 'medium'
+ELSE 'small' END AS popsize_group
+INTO pop_plus       
+FROM populations
+WHERE year = 2015;
+
+SELECT c.name, c.continent, c.geosize_group, p.popsize_group
+FROM countries_plus AS c
+JOIN pop_plus AS p 
+ON p.country_code = c.code
+ORDER BY geosize_group;
+
+
+
+
