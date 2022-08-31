@@ -264,3 +264,106 @@ ON p.physician_id=a.attending_physician_id
 GROUP BY p.physician_id, full_name;
 
 
+--Hard
+
+
+--1.Show all of the patients grouped into weight groups. Show the total amount of patients in each weight group. Order the list by the weight group decending. 
+
+WITH tpatients AS (
+  SELECT weight,
+  CASE
+  WHEN weight BETWEEN 130 AND 139 THEN '130'
+  WHEN weight BETWEEN 120 AND 129 THEN '120'
+  WHEN weight BETWEEN 110 AND 119 THEN '110'
+  WHEN weight BETWEEN 100 AND 109 THEN '100'
+  WHEN weight BETWEEN 90 AND 99 THEN '90'
+  WHEN weight BETWEEN 80 AND 89 THEN '80'
+  WHEN weight BETWEEN 70 AND 79 THEN '70'
+  WHEN weight BETWEEN 60 AND 69 THEN '60'
+  WHEN weight BETWEEN 50 AND 59 THEN '50'
+  WHEN weight BETWEEN 40 AND 49 THEN '40'
+  WHEN weight BETWEEN 30 AND 39 THEN '30'
+  WHEN weight BETWEEN 20 AND 29 THEN '20'
+  WHEN weight BETWEEN 10 AND 19 THEN '10'
+  ELSE '0'
+  END AS 'weight_group'
+  FROM patients
+)
+
+SELECT COUNT(weight) AS patients_in_group, weight_group
+FROM tpatients
+GROUP BY weight_group
+ORDER BY LEN(weight_group) DESC, weight_group DESC;
+
+--2.Show patient_id, weight, height, isObese from the patients table. 
+
+SELECT patient_id, weight, height, 
+CASE
+WHEN (weight/POWER((height/100.0), 2)) >=30 THEN '1'
+ELSE '0'
+END AS 'isObese'
+FROM patients;
+
+--3.Show patient_id, first_name, last_name, and attending physician's specialty. Show only the patients who has a primary_diagnosis as 'Dementia' and the physician's first name is 'Lisa' 
+
+SELECT pat.patient_id, pat.first_name, pat.last_name, phy.specialty
+FROM patients AS pat 
+JOIN admissions AS adm 
+ON pat.patient_id = adm.patient_id
+JOIN physicians AS phy 
+ON phy.physician_id = adm.attending_physician_id
+WHERE adm.primary_diagnosis = 'Dementia'
+AND phy.first_name = 'Lisa';
+
+--4.Show the patient_id and temp_password. The password must be the following, in order: 1. patient_id 2. the numerical length of patient's last_name 3. year of patient's birth_date 
+
+SELECT p.patient_id, CONCAT(p.patient_id,LEN(p.last_name),YEAR(p.birth_date)) AS temp_password
+FROM patients AS p 
+JOIN admissions AS a 
+ON p.patient_id=a.patient_id
+GROUP BY p.patient_id
+HAVING COUNT(admission_date)>=1;
+
+--5.Each admission costs $50 for patients without insurance, and $10 for patients with insurance. All patients with an even patient_id have insurance. Give each patient a 'Yes' if they have insurance, and a 'No' if they don't have insurance. Add up the admission_total cost for each has_insurance group. 
+
+SELECT
+CASE WHEN patient_id%2=0 THEN 'Yes'
+ELSE 'No'
+END AS has_insurance,
+SUM(CASE WHEN patient_id%2=0 THEN 10
+ELSE 50
+END) AS cost_after_insurance  
+FROM admissions
+GROUP BY has_insurance;
+
+--6.Show the provinces that has more patients identified as 'M' than 'F'.
+
+SELECT province_name
+FROM provinces AS pro 
+JOIN patients AS pat
+ON pro.province_id=pat.province_id
+GROUP BY province_name
+HAVING SUM(
+  CASE WHEN gender = 'M' THEN 1
+  ELSE 0 END) 
+> SUM(
+  CASE WHEN gender = 'F' THEN 1 
+  ELSE 0 END);
+
+--7.We are looking for a specific patient. Pull all columns for the patient who matches the following criteria: 
+--First_name contains an 'r' after the first two letters.
+--Identifies their gender as 'F'
+--Born in February, May, or December
+--Their weight would be between 60kg and 80kg
+--Their patient_id is an odd number
+--They are from the city 'Halifax' 
+
+SELECT *
+FROM patients
+WHERE first_name LIKE '__r%'
+AND gender = 'F'
+AND MONTH(birth_date) IN (02,05,12)
+AND weight BETWEEN 60 AND 80
+AND patient_id%2=1
+AND city = 'Halifax';
+
