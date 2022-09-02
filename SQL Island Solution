@@ -1,0 +1,256 @@
+--SQL Island
+--http://wwwlgis.informatik.uni-kl.de/cms/courses/informationssysteme/sqlisland/
+
+--Oh dear, what happened? It seems that I am the only survivor of the air crash. Wow, there are some villages on this island.
+
+SELECT *
+FROM village;
+
+--It seems there are a few people living in these villages. How can I see a list of all inhabitants?
+
+
+SELECT *
+FROM inhabitant;
+
+--Man! I'm hungry. I will go and find a butcher to ask for some free sausages.
+
+SELECT * 
+FROM inhabitant 
+WHERE job = 'butcher';
+
+--There you are! Enjoy your meal! But take care of yourself. As long as you are unarmed, stay away from villains. Not everyone on this island is friendly.
+
+--Thank you, Edward! Okay, let's see who is friendly on this island...
+
+SELECT *
+FROM inhabitant
+WHERE state = 'friendly';
+
+--There is no way around getting a sword for myself. I will now try to find a friendly weaponsmith to forge me one.
+
+SELECT *
+FROM inhabitant
+WHERE state = 'friendly'
+AND job = 'weaponsmith';
+
+--Oh, that does not look good. Maybe other friendly smiths can help you out.
+
+SELECT *
+FROM inhabitant
+WHERE state = 'friendly'
+AND job LIKE '%smith';
+
+--That looks better! I will go and visit those smiths.
+
+--Hi stranger! Where are you going? I'm Paul, I'm the major of Monkeycity. I will go ahead and register you as a citizen.
+
+INSERT INTO inhabitant (name, villageid, gender, job, gold, state) 
+VALUES ('Stranger', 1, '?', '?', 0, '?');
+
+--No need to call me stranger! What's my personid?
+
+SELECT personid
+FROM inhabitant
+WHERE name = 'Stranger';
+
+--personid is 20!
+
+--Hi Ernest! How much is a sword?
+
+--I can offer to make you a sword for 150 gold. That's the cheapest you will find! How much gold do you have?
+
+SELECT gold
+FROM inhabitant
+WHERE name = 'Stranger';
+
+--Stranger has no gold
+
+--Damn! No mon, no fun. There has to be another option to earn gold other than going to work. 
+--Maybe I could collect ownerless items and sell them! 
+--Can I make a list of all items that don't belong to anyone?
+
+SELECT *
+FROM item
+WHERE owner IS NULL;
+
+--So much cool stuff!
+– Yay, a coffee cup. Let's collect it!
+
+UPDATE item 
+SET owner = 20 
+WHERE item = 'coffee cup';
+
+--Do you know a trick how to collect all the ownerless items?
+
+UPDATE item
+SET owner = 20
+WHERE owner IS NULL;
+
+--Now list all of the items I have!
+SELECT *
+FROM item
+WHERE owner = 20;
+
+--Find a friendly inhabitant who is either a dealer or a merchant. Maybe they want to buy some of my items.
+
+SELECT *
+FROM inhabitant
+WHERE state = 'friendly'
+AND (job = 'merchant' OR job = 'dealer');
+
+--I'd like to get the ring and the teapot. The rest is nothing but scrap. Please give me the two items. My personid is 15.
+
+UPDATE item
+SET owner = 15
+WHERE item IN ('ring','teapot');
+
+–Thank you!
+--Here, some gold
+
+UPDATE inhabitant 
+SET gold = gold + 120 
+WHERE personid = 20 
+
+--Unfortunately, that's not enough gold to buy a sword. Seems like I do have to work after all. 
+--Maybe it's not a bad idea to change my name from Stranger to my real name before I will apply for a job.
+
+UPDATE inhabitant
+SET name = 'Sam'
+WHERE personid = 20;
+
+--Since baking is one of my hobbies, why not find a baker who I can work for?
+
+SELECT *
+FROM inhabitant
+WHERE job = 'baker'
+ORDER BY gold DESC;
+
+--Aha, Paul! I know him!
+
+--Hi, you again! So, Sam is your name. I saw you want to work as a baker? Okay! You will be paid 1 gold for 100 bread rolls.
+--(8 hours later...) Here, I made ten thousand bread rolls! I quit! This should be enough money to buy a sword. Let's see what happens with my gold balance.
+
+UPDATE inhabitant 
+SET gold = gold + 100 - 150 
+WHERE personid = 20;
+
+--Here's your new sword, Som! Now you can go everywhere.
+
+INSERT INTO item (item, owner) 
+VALUES ('sword', 20);
+
+--My name is Sam! Thanks anyway!
+--Is there a pilot on this island by any chance? He could fly me home.
+
+SELECT *
+FROM inhabitant
+WHERE job = 'pilot';
+
+--Oh no, his state is 'kidnapped'.
+--Horrible, the pilot is held captive by Dirty Dieter!
+
+SELECT village.name 
+FROM village, inhabitant 
+WHERE village.villageid = inhabitant.villageid 
+AND inhabitant.name = 'Dirty Dieter';
+
+--Dirty Dieter is in Onionville!
+--I can find out the chief's name of the village Onionville.
+
+SELECT i.name
+FROM inhabitant AS i
+JOIN village AS v
+ON i.villageid=v.villageid
+AND v.chief=i.personid
+WHERE v.name = 'Onionville';
+
+--I've got it! I will visit Fred and ask him about Dirty Dieter and the pilot.
+--Um, how many inhabitants does Onionville have?
+
+SELECT COUNT(*) 
+FROM inhabitant, village 
+WHERE village.villageid = inhabitant.villageid 
+AND village.name = 'Onionville';
+
+--There are 8 inhabitants
+
+--Hello Sam, the pilot is held captive by Dirty Dieter in his sister's house. 
+--Shall I tell you how many women there are in Onionville? Nah, you can figure it out by yourself!
+
+SELECT COUNT(*)
+FROM inhabitant
+WHERE gender = 'f'
+AND villageid = 
+(SELECT villageid 
+FROM village
+WHERE name = 'Onionville');
+
+--Oh, only one woman. What's her name?
+
+SELECT name
+FROM inhabitant
+WHERE gender = 'f'
+AND villageid = 
+(SELECT villageid 
+FROM village
+WHERE name = 'Onionville');
+
+--Her name is Dirty Diane
+--Let’s go
+
+--Sam, if you hand me over the entire property of our nearby village Cucumbertown, I will release the pilot. I will show you now what this property consists of.
+
+SELECT SUM(inhabitant.gold) 
+FROM inhabitant, village 
+WHERE village.villageid = inhabitant.villageid 
+AND village.name = 'Cucumbertown';
+
+--8980 gold!
+--Oh no, baking bread alone can't solve my problems. 
+--If I continue working and selling items though, I could earn more gold than the worth of gold inventories of all bakers, dealers and merchants together. 
+--How much gold is that?
+
+SELECT SUM(gold)
+FROM inhabitant
+WHERE job IN ('baker','dealer','merchant');
+
+--4130 gold!
+--That’s not enough
+
+--Let's have a look at how much average gold people own, depending on their job.
+
+SELECT job, SUM(inhabitant.gold), AVG(inhabitant.gold) 
+FROM inhabitant 
+GROUP BY job 
+ORDER BY AVG(inhabitant.gold);
+
+--Very interesting: For some reason, butchers own the most gold. How much gold do different inhabitants have on average, depending on their state?
+
+SELECT state, AVG(gold)
+FROM inhabitant
+GROUP BY state;
+
+--Ok, so the only way is to mug the villains.
+--Or I might as well go ahead and just kill Dirty Dieter with my sword!
+
+DELETE FROM inhabitant 
+WHERE name = 'Dirty Dieter';
+
+--Heeeey! Now I'm very angry! What will you do next, Sam?
+
+DELETE FROM inhabitant
+WHERE name = 'Dirty Diane';
+
+--Yeah! Now I release the pilot!
+
+UPDATE inhabitant
+SET state = 'friendly'
+WHERE job = 'pilot';
+
+--Thank's for releasing me, Sam! I will fly you home!
+--I take my sword, some gold and lots of useless items with me as a souvenir. What a big adventure!
+
+UPDATE inhabitant 
+SET state = 'emigrated' 
+WHERE personid = 20;
+
