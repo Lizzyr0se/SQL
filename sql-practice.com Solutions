@@ -344,11 +344,11 @@ JOIN patients AS pat
 ON pro.province_id=pat.province_id
 GROUP BY province_name
 HAVING SUM(
-  CASE WHEN gender = 'M' THEN 1
-  ELSE 0 END) 
+CASE WHEN gender = 'M' THEN 1
+ELSE 0 END) 
 > SUM(
-  CASE WHEN gender = 'F' THEN 1 
-  ELSE 0 END);
+CASE WHEN gender = 'F' THEN 1 
+ELSE 0 END);
 
 --7.We are looking for a specific patient. Pull all columns for the patient who matches the following criteria: 
 --First_name contains an 'r' after the first two letters.
@@ -366,4 +366,54 @@ AND MONTH(birth_date) IN (02,05,12)
 AND weight BETWEEN 60 AND 80
 AND patient_id%2=1
 AND city = 'Halifax';
+
+--8.Show the percent of patients that have 'M' as their gender. Round the answer to the nearest hundreth number and in percent form. 
+
+SELECT CONCAT(ROUND(
+(SELECT COUNT(*) FROM patients WHERE gender = 'M')
+/CAST(COUNT(*) AS FLOAT)*100.0,2),'%')
+FROM patients;
+
+--9.Show the patient_id and total_spent for patients who spent over 150 in medication_cost. Sort by most total_spent to least total_spent. 
+
+SELECT patient_id,
+SUM(m.medication_cost) AS total_spent
+FROM unit_dose_orders AS u 
+JOIN medications AS m 
+ON u.medication_id = m.medication_id
+GROUP BY patient_id
+HAVING total_spent > 150
+ORDER BY total_spent DESC;
+
+--10.Provide the description of each item, along with the total cost of the quantity on hand (rounded to the nearest whole dollar), and the associated primary vendor. 
+
+SELECT item_description, ROUND(item_cost*quantity_on_hand)AS total_cost, v.vendor_name
+FROM items as i 
+JOIN vendors AS v 
+ON i.primary_vendor_id = v.vendor_id;
+
+--11.For each day display the total amount of admissions on that day. Display the amount changed from the previous date. 
+
+WITH tempadm AS (
+SELECT admission_date, COUNT(*) AS admission_count
+FROM admissions
+GROUP BY admission_date
+)
+
+SELECT admission_date, admission_count, 
+admission_count - LAG(admission_count) OVER(ORDER BY admission_date) AS admission_change
+FROM tempadm;
+
+--12.For each province, display the total amount patients spent on medication. Order by the most to least spent. 
+
+SELECT province_name, ROUND(SUM(medication_cost)) AS spent_on_healthcare
+FROM provinces AS pro 
+JOIN patients AS pat 
+ON pro.province_id=pat.province_id
+JOIN unit_dose_orders AS u 
+ON pat.patient_id=u.patient_id
+JOIN medications AS m 
+ON u.medication_id=m.medication_id
+GROUP BY province_name
+ORDER BY spent_on_healthcare DESC;
 
