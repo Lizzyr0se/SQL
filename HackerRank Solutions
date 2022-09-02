@@ -367,3 +367,34 @@ AND w.coins_needed=
  WHERE w.power=w2.power AND wp.age=wp2.age)
 ORDER BY power DESC, age DESC;
 
+--Contest Leaderboard
+
+SELECT h.hacker_id, h.name, SUM(t.max_score) AS total_score
+FROM hackers AS h
+JOIN (SELECT challenge_id, hacker_id, MAX(score) AS max_score
+FROM  submissions
+GROUP BY challenge_id, hacker_id) AS t
+ON h.hacker_id=t.hacker_id
+GROUP BY h.hacker_id, h.name
+HAVING SUM(t.max_score) > 0
+ORDER BY total_score DESC, h.hacker_id ASC;
+
+--Challenges
+
+SELECT h.hacker_id, h.name, COUNT(c.challenge_id) AS challenges_created
+FROM hackers AS h
+JOIN challenges AS c
+ON h.hacker_id = c.hacker_id
+HAVING challenges_created = 
+(SELECT COUNT(c2.challenge_id) AS mc
+FROM challenges AS c2
+GROUP BY c2.hacker_id
+ORDER BY mc DESC
+LIMIT 1)
+OR challenges_created IN 
+(SELECT DISTINCT COUNT(c3.challenge_id) AS oc
+FROM challenges AS c3
+GROUP BY c3.hacker_id)
+GROUP BY h.hacker_id, h.name
+ORDER BY COUNT(c.challenge_id) DESC, h.hacker_id ASC;
+
