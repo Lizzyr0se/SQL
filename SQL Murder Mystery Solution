@@ -1,0 +1,167 @@
+--The SQL Murder Mystery
+--https://mystery.knightlab.com/
+
+--Info we know:
+--crime = murder
+--date = Jan 15, 2018
+--location = SQL City
+
+--First, pull crime report
+
+SELECT *
+FROM crime_scene_report
+WHERE type = 'murder'
+AND date = 20180115
+AND city = 'SQL City';
+
+--We found out the crime description!
+–“Security footage shows that there were 2 witnesses. 
+--The first witness lives at the last house on "Northwestern Dr". 
+--The second witness, named Annabel, lives somewhere on "Franklin Ave".”
+
+--Now, we need to find out the id numbers for both witnesses:
+
+SELECT id, MAX(address_number)
+FROM person
+WHERE address_street_name = 'Northwestern Dr';
+
+--Witness 1 has id 14887
+
+SELECT id
+FROM person
+WHERE address_street_name = 'Franklin Ave'
+AND name LIKE '%Annabel%';
+
+--Witness 2 has id 16371
+
+--Let’s read their witness reports
+
+SELECT *
+FROM interview
+WHERE person_id = 14887;
+
+--Witness 1 said: “I heard a gunshot and then saw a man run out. He had a "Get Fit Now Gym" bag. 
+--The membership number on the bag started with "48Z". 
+--Only gold members have those bags. 
+--The man got into a car with a plate that included "H42W"."
+
+SELECT *
+FROM interview
+WHERE person_id = 16371;
+
+--Witness 2 said: “I saw the murder happen, and I recognized the killer from my gym when I was working out last week on January the 9th.”
+
+--Let’s find all the people that have a gold status gym membership number that start with '48Z'
+
+SELECT *
+FROM get_fit_now_member
+WHERE id LIKE '48Z%'
+AND membership_status = 'gold';
+
+--Two men matched our query: 
+--Joe Germuska – membership id – 48Z7A / person id - 28819 
+--Jeremy Bowers – membership id – 48Z55 / person id - 67318
+
+--When was Witness 2 at the gym?
+
+SELECT * 
+FROM get_fit_now_member
+WHERE person_id = 16371;
+
+--We found out her membership id – 90081
+
+SELECT * 
+FROM get_fit_now_check_in
+WHERE membership_id = '90081'
+AND check_in_date = 20180109;
+
+--We can see she saw the murderer at the gym between 1600 and 1700
+
+--When were our two suspects at the gym?
+
+SELECT * 
+FROM get_fit_now_check_in
+WHERE membership_id IN ('48Z7A','48Z55')
+AND check_in_date = 20180109;
+
+--Joe was there from 1600 to 1730
+--Jeremy was there from 1530 to 1700
+
+--Dang it, it could still be both of them!
+
+--Let’s find out who drives the car with a partial plate of 'H42W'
+
+SELECT *
+FROM drivers_license
+WHERE plate_number LIKE '%H42W%';
+
+--Three different drivers license numbers match the partial plate: 183779, 423327, and 664760
+
+--Who belongs to these drivers license numbers?
+
+SELECT id, name, license_id
+FROM person
+WHERE license_id IN (183779, 423327, 664760);
+
+--We got a hit!! Jeremy Bowers has license id 423327! We found the murderer!
+
+INSERT INTO solution VALUES (1, 'Jeremy Bowers');
+        
+SELECT value FROM solution;
+
+--Congrats, you found the murderer! 
+--But wait, there's more... 
+--If you think you're up for a challenge, try querying the interview transcript of the murderer to find the real villain behind this crime. 
+--If you feel especially confident in your SQL skills, try to complete this final step with no more than 2 queries. 
+
+SELECT *
+FROM interview
+WHERE person_id = 67318;
+
+--The murderer said “I was hired by a woman with a lot of money. 
+--I don't know her name but I know she's around 5'5" (65") or 5'7" (67"). 
+--She has red hair and she drives a Tesla Model S. 
+--I know that she attended the SQL Symphony Concert 3 times in December 2017.”
+
+--Query 1
+--Find drivers license number
+
+SELECT *
+FROM drivers_license
+WHERE gender = 'female'
+AND height BETWEEN 65 AND 67
+AND hair_color = 'red'
+AND car_make = 'Tesla'
+AND car_model = 'Model S';
+
+--Three drivers license numbers came back: 202298, 291182, and 918773
+
+--Query 2
+--Find all the people who went to the symphony three times in December 2017
+
+SELECT person_id, COUNT(event_id)
+FROM facebook_event_checkin
+WHERE event_name = 'SQL Symphony Concert'
+AND date LIKE '201712%'
+GROUP BY person_id
+HAVING COUNT(event_id) = 3;
+
+--Two id numbers came back: 24556 and 99716
+
+--Let’s see if our id numbers match any of our drivers license numbers
+
+SELECT *
+FROM person
+WHERE license_id IN (202298, 291182, 918773);
+
+--We got a match!! Miranda Priestly has id 99716! We found the true criminal!!
+
+INSERT INTO solution VALUES (1, 'Miranda Priestly');
+        
+SELECT value FROM solution;
+
+--Congrats, you found the brains behind the murder! 
+--Everyone in SQL City hails you as the greatest SQL detective of all time. 
+--Time to break out the champagne! 
+
+
