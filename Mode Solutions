@@ -525,3 +525,212 @@ LEFT JOIN tutorial.crunchbase_investments_part2 AS i
 ON c.permalink = i.company_permalink
 GROUP BY dataset_name, c.status;
 
+
+--Advanced SQL
+
+
+--SQL Data Types
+
+
+--Convert the funding_total_usd and founded_at_clean columns in the tutorial.crunchbase_companies_clean_date table to strings (varchar format).
+
+SELECT CAST(funding_total_usd AS varchar), CAST(founded_at_clean AS varchar)
+FROM tutorial.crunchbase_companies_clean_date;
+
+
+--SQL Date Format
+
+
+--Write a query that counts the number of companies acquired within 3 years, 5 years, and 10 years of being founded (in 3 separate columns). Include a column for total companies acquired as well. Group by category and limit to only rows with a founding date. 
+
+SELECT c.category_code,
+COUNT(CASE WHEN a.acquired_at_cleaned <= CAST(c.founded_at_clean AS timestamp) + INTERVAL '3 years'
+THEN 1 ELSE NULL END) AS acquired_3_yrs,
+COUNT(CASE WHEN a.acquired_at_cleaned <= CAST(c.founded_at_clean AS timestamp) + INTERVAL '5 years'
+THEN 1 ELSE NULL END) AS acquired_5_yrs,
+COUNT(CASE WHEN a.acquired_at_cleaned <= CAST(c.founded_at_clean AS timestamp) + INTERVAL '10 years'
+THEN 1 ELSE NULL END) AS acquired_10_yrs,
+COUNT(c.category_code) AS total
+FROM tutorial.crunchbase_companies_clean_date AS c
+JOIN tutorial.crunchbase_acquisitions_clean_date AS a
+ON a.company_permalink = c.permalink
+WHERE founded_at_clean IS NOT NULL
+GROUP BY c.category_code
+ORDER BY total DESC;
+
+
+--Using SQL String Functions to Clean Data
+
+
+--Write a query that separates the `location` field into separate fields for latitude and longitude. You can compare your results against the actual `lat` and `lon` fields in the table. 
+
+SELECT location, 
+TRIM(leading '(' FROM LEFT(location, POSITION(',' IN location) - 1)) AS lat,
+TRIM(trailing ')' FROM RIGHT(location, LENGTH(location) - POSITION(',' IN location) ) ) AS long
+FROM tutorial.sf_crime_incidents_2014_01;
+
+--Concatenate the lat and lon fields to form a field that is equivalent to the location field.
+
+SELECT CONCAT('(', lat,', ', lon,')'), location 
+FROM tutorial.sf_crime_incidents_2014_01;
+
+--Create the same concatenated location field, but using the || syntax instead of CONCAT. 
+
+SELECT '(' || lat || ', ' || lon || ')', location
+FROM tutorial.sf_crime_incidents_2014_01;
+
+--Write a query that creates a date column formatted YYYY-MM-DD. 
+
+SELECT SUBSTR(date, 7, 4) || '-' || LEFT(date, 2) || '-' || SUBSTR(date, 4, 2), date
+FROM tutorial.sf_crime_incidents_2014_01;
+
+--Write a query that returns the `category` field, but with the first letter capitalized and the rest of the letters in lower-case 
+
+SELECT CONCAT(UPPER(LEFT(category, 1)), LOWER(RIGHT(category, LENGTH(category) -1))), category
+FROM tutorial.sf_crime_incidents_2014_01;
+
+--Write a query that creates an accurate timestamp using the date and time columns in tutorial.sf_crime_incidents_2014_01. Include a field that is exactly 1 week later as well. 
+
+SELECT CAST(SUBSTR(date, 7, 4) || '-' || LEFT(date, 2) || '-' || SUBSTR(date, 4, 2) || ' ' || time || ':00' AS timestamp) AS date_cleaned,
+CAST(SUBSTR(date, 7, 4) || '-' || LEFT(date, 2) || '-' || SUBSTR(date, 4, 2) || ' ' || time || ':00' AS timestamp) + INTERVAL '1 week' AS week_later
+FROM tutorial.sf_crime_incidents_2014_01;
+
+--Write a query that counts the number of incidents reported by week. Cast the week as a date to get rid of the hours/minutes/seconds. 
+
+SELECT CAST(DATE_TRUNC('week', cleaned_date) AS date) AS week,
+       COUNT(*) AS incidents
+  FROM tutorial.sf_crime_incidents_cleandate
+ GROUP BY week
+ ORDER BY week;
+
+--Write a query that shows exactly how long ago each indicent was reported. Assume that the dataset is in Pacific Standard Time (UTC - 8). 
+
+SELECT incidnt_num, NOW() AT TIME ZONE 'PST' - cleaned_date 
+FROM tutorial.sf_crime_incidents_cleandate;
+
+
+--Writing Subqueries in SQL
+
+
+--Write a query that selects all Warrant Arrests from the tutorial.sf_crime_incidents_2014_01 dataset, then wrap it in an outer query that only displays unresolved incidents. 
+
+SELECT *
+FROM (SELECT *
+FROM tutorial.sf_crime_incidents_2014_01
+WHERE descript = 'WARRANT ARREST') AS temp
+WHERE resolution = 'NONE';
+
+--Write a query that displays the average number of monthly incidents for each category. 
+
+SELECT category, AVG(temp.incidents)
+FROM (
+SELECT category, COUNT(incidnt_num) AS incidents, EXTRACT ('month' FROM cleaned_date) AS month
+FROM tutorial.sf_crime_incidents_cleandate
+GROUP BY category, month
+) AS temp
+GROUP BY category;
+
+--Write a query that displays all rows from the three categories with the fewest incidents reported. 
+
+SELECT t.*
+FROM tutorial.sf_crime_incidents_2014_01 AS t
+JOIN (SELECT category, COUNT(category) AS incidents
+FROM tutorial.sf_crime_incidents_2014_01
+GROUP BY category
+ORDER BY incidents
+LIMIT 3) AS temp
+ON t.category = temp.category;
+
+--Write a query that counts the number of companies founded and acquired by quarter starting in Q1 2012. Create the aggregations in two separate queries, then join them. 
+
+SELECT COALESCE(c.quarter, a.quarter) AS quarter, c.companies_founded, a.companies_acquired
+FROM (
+SELECT founded_quarter AS quarter,
+COUNT(permalink) AS companies_founded
+FROM tutorial.crunchbase_companies
+WHERE founded_year >= 2012
+GROUP BY quarter
+) AS c
+LEFT JOIN (
+SELECT acquired_quarter AS quarter,
+COUNT(DISTINCT company_permalink) AS companies_acquired
+FROM tutorial.crunchbase_acquisitions
+WHERE acquired_year >= 2012
+GROUP BY quarter
+) AS a
+ON c.quarter = a.quarter
+ORDER BY quarter;
+
+--Write a query that ranks investors from the combined dataset above by the total number of investments they have made. 
+
+SELECT investor_name, COUNT(*) AS total
+FROM (
+SELECT *
+FROM tutorial.crunchbase_investments_part1
+ 
+UNION ALL
+  
+SELECT *
+FROM tutorial.crunchbase_investments_part2
+) sub
+GROUP BY investor_name
+ORDER BY total DESC;
+
+--Write a query that does the same thing as in the previous problem, except only for companies that are still operating. Hint: operating status is in tutorial.crunchbase_companies. 
+
+SELECT i.investor_name, COUNT(i.*) AS total
+FROM tutorial.crunchbase_companies AS c
+JOIN (
+SELECT *
+FROM tutorial.crunchbase_investments_part1
+   
+UNION ALL
+
+SELECT *
+FROM tutorial.crunchbase_investments_part2
+) AS i
+ON i.company_permalink = c.permalink 
+WHERE c.status = 'operating'
+GROUP BY i.investor_name
+ORDER BY total DESC;
+
+
+--SQL Window Functions
+
+--Write a query modification of the above example query that shows the duration of each ride as a percentage of the total time accrued by riders from each start_terminal 
+
+SELECT start_terminal, duration_seconds,
+SUM(duration_seconds) OVER (PARTITION BY start_terminal) AS start_terminal_sum,
+(duration_seconds/SUM(duration_seconds) OVER (PARTITION BY start_terminal))*100 AS pct_of_total_time
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
+
+--Write a query that shows a running total of the duration of bike rides (similar to the last example), but grouped by end_terminal, and with ride duration sorted in descending order. 
+
+SELECT end_terminal, duration_seconds,
+SUM(duration_seconds) OVER (PARTITION BY end_terminal ORDER BY duration_seconds DESC) AS running_total
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
+ORDER BY duration_seconds DESC;
+
+--Write a query that shows the 5 longest rides from each starting terminal, ordered by terminal, and longest to shortest rides within each terminal. Limit to rides that occurred before Jan. 8, 2012. 
+
+SELECT *
+FROM (
+SELECT start_terminal, start_time, duration_seconds AS trip_time,
+RANK() OVER (PARTITION BY start_terminal ORDER BY duration_seconds DESC) AS rank
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
+) AS t
+WHERE rank <= 5
+ORDER BY start_terminal, trip_time;
+
+--Write a query that shows only the duration of the trip and the percentile into which that duration falls (across the entire dataset—not partitioned by terminal). 
+
+SELECT duration_seconds,
+NTILE(100) OVER (ORDER BY duration_seconds) AS percentile
+FROM tutorial.dc_bikeshare_q1_2012
+ORDER BY duration_seconds DESC;
+
+
+
