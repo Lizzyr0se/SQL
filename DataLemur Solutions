@@ -1,0 +1,204 @@
+--datalemur.com
+
+
+--Robinhood
+
+SELECT u.city, COUNT(t.order_id) AS total_orders
+FROM users AS u   
+JOIN trades AS t
+ON u.user_id = t.user_id
+WHERE t.status = 'Completed'
+GROUP BY u.city
+ORDER BY total_orders DESC
+LIMIT 3;
+
+--Page With No Likes
+
+SELECT page_id
+FROM pages
+WHERE page_id NOT IN
+(SELECT page_id
+FROM page_likes);
+
+--Laptop vs Mobile Viewership
+
+SELECT SUM(CASE WHEN device_type = 'laptop' THEN 1 ELSE 0 END) AS laptop_views,
+SUM(CASE WHEN device_type IN ('tablet','phone') THEN 1 ELSE 0 END) AS mobile_views
+FROM viewership;
+
+--Purchasing Activity by Product Type
+
+SELECT order_date, product_type, 
+SUM(quantity) OVER(PARTITION BY product_type ORDER BY order_date) AS cum_purchased
+FROM total_trans
+ORDER BY order_date, cum_purchased;
+
+--Teams Power Users
+
+SELECT sender_id, COUNT(sender_id) AS message_count
+FROM messages
+WHERE sent_date>= '08/01/2022'
+AND sent_date<= '08/31/2022'
+GROUP BY sender_id
+ORDER BY message_count DESC
+LIMIT 2;
+
+--Highest Number of Products
+
+SELECT user_id, COUNT(product_id) AS product_num
+FROM user_transactions
+GROUP BY user_id
+HAVING SUM(spend)>=1000
+ORDER BY product_num DESC, SUM(spend) DESC
+LIMIT 3;
+
+--Histogram of Tweets
+
+WITH tweettemp AS (
+SELECT user_id, COUNT(tweet_id) AS tweet_bucket
+FROM tweets
+WHERE tweet_date >= '01/01/2022'
+AND tweet_date <= '12/31/2022'
+GROUP BY user_id)
+
+SELECT tweet_bucket, COUNT(user_id) AS users_num
+FROM tweettemp
+GROUP BY tweet_bucket;
+
+--Spare Server Capacity
+
+SELECT d.datacenter_id, (d.monthly_capacity - SUM(fd.monthly_demand)) AS spare_capacity
+FROM datacenters AS d
+JOIN forecasted_demand AS fd
+ON d.datacenter_id=fd.datacenter_id
+GROUP BY d.datacenter_id, d.monthly_capacity
+ORDER BY d.datacenter_id, spare_capacity; 
+
+--Repeat Purchases on Multiple Days 
+
+WITH temppur AS(
+SELECT user_id, product_id, COUNT(DISTINCT purchase_date) AS total
+FROM purchases
+GROUP BY user_id, product_id)
+
+SELECT COUNT(DISTINCT user_id)
+FROM temppur
+WHERE total > 2;
+
+--Duplicate Job Listings
+
+WITH tempjob AS (
+SELECT company_id, title, description, COUNT(job_id) AS cnt
+FROM job_listings
+GROUP BY company_id, title, description
+HAVING COUNT(job_id)>1)
+
+SELECT COUNT(DISTINCT company_id)
+FROM tempjob;
+
+
+--Average Post Hiatus (Part 1 )
+
+SELECT user_id, MAX(DATE(post_date)) - MIN(DATE(post_date)) AS days_between
+FROM posts
+WHERE post_date BETWEEN '01-01-2021' AND '12-31-2021'
+GROUP BY user_id
+HAVING COUNT(post_id)>=2;
+
+--App Clickthrough Rate (CTR) 
+
+SELECT app_id, ROUND((100.0*SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END))/
+SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END),2) AS ctr
+FROM events
+WHERE timestamp BETWEEN '01/01/2022' AND '12/31/2022'
+GROUP BY app_id;
+
+--User’s Third Transaction
+
+WITH tempt AS (
+SELECT user_id, spend, transaction_date,
+RANK () OVER (PARTITION BY user_id ORDER BY transaction_date) AS rn
+FROM transactions)
+
+SELECT user_id, spend, transaction_date
+FROM tempt
+WHERE rn = 3;
+
+--LinkedIn Power Creators (Part 1) 
+
+SELECT p.profile_id
+FROM personal_profiles AS p
+JOIN company_pages AS c 
+ON p.employer_id = c.company_id
+WHERE p.followers > c.followers
+ORDER BY profile_id;
+
+--Highest-Grossing Items 
+
+WITH tempp AS (
+SELECT category, product, SUM(spend) AS total_spend,
+RANK() OVER (PARTITION BY category ORDER BY SUM(spend) DESC) AS rn
+FROM product_spend
+WHERE transaction_date BETWEEN '01/01/2022' and '12/31/2022'
+GROUP BY category, product)
+
+SELECT category, product, total_spend
+FROM tempp
+WHERE rn < 3;
+
+--Photoshop Revenue Analysis
+
+SELECT customer_id, SUM(
+CASE WHEN product <> 'Photoshop' THEN revenue
+ELSE NULL
+END)
+FROM adobe_transactions
+WHERE customer_id IN 
+(SELECT customer_id
+FROM adobe_transactions
+WHERE product = 'Photoshop')
+GROUP BY customer_id;
+
+--Data Science Skills
+
+SELECT candidate_id
+FROM candidates
+GROUP BY candidate_id
+HAVING SUM(
+CASE WHEN skill = 'Python' THEN 1
+WHEN skill = 'Tableau' THEN 1
+WHEN skill = 'PostgreSQL' THEN 1
+ELSE 0
+END) = 3
+ORDER BY candidate_id;
+
+--Histogram of Users and Purchases 
+
+SELECT transaction_date, COUNT(DISTINCT user_id) AS number_of_users,
+COUNT(product_id) AS number_of_products
+FROM user_transactions
+GROUP BY transaction_date
+HAVING transaction_date IN (
+SELECT MAX(transaction_date)
+FROM user_transactions
+GROUP BY user_id);
+
+	--or this way
+
+WITH tempu AS (
+SELECT *, 
+RANK() OVER(PARTITION BY user_id ORDER BY transaction_date DESC) AS rn
+FROM user_transactions)
+
+SELECT transaction_date, COUNT(DISTINCT user_id) AS number_of_users,
+COUNT(product_id) AS number_of_products
+FROM tempu
+WHERE rn = 1
+GROUP BY transaction_date;
+
+--Average Review Ratings
+
+SELECT EXTRACT(MONTH FROM submit_date) AS month, product_id, ROUND(AVG(stars),2)
+FROM reviews
+GROUP BY product_id, month
+ORDER BY month, product_id;
