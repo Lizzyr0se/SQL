@@ -82,3 +82,152 @@ ORDER BY salary DESC
 LIMIT 1
 OFFSET 2;
 
+--13.Aliases, Subqueries, AND/OR
+
+SELECT DISTINCT c.first_name, c.last_name
+FROM checked_out AS c
+JOIN checked_out AS c2
+WHERE c.last_name = c2.last_name
+AND c.first_name <> c2.first_name;
+
+--14.INNER JOIN
+
+SELECT DISTINCT c.first_name, c.last_name
+FROM checked_out AS c
+INNER JOIN books AS b
+ON c.book_id = b.book_id
+WHERE author = ‘Terry Crews’;
+
+--15.INNER JOIN, AND/OR
+
+SELECT c.first_name, c.last_name
+FROM checked_out AS c
+INNER JOIN books AS b
+ON c.book_id = b.book_id
+WHERE book_name = ‘To Kill a Mockingbird’;
+
+--16.AVG
+
+SELECT AVG(salary)
+FROM salaries;
+
+--17.SELECT Introduction
+
+SELECT professor_name, salary + 10000
+FROM salaries
+WHERE department = ‘Computer Science’;
+
+--18.SQLite Metadata
+
+SELECT sql
+FROM sqlite_master
+WHERE type = ‘table’
+AND tbl_name = ‘checked_out’;
+
+--19.MIN, Subqueries
+
+SELECT professor_name, salary
+FROM salaries
+WHERE salary > 4 * (
+SELECT MIN(salary)
+FROM salaries);
+
+--20.COUNT, DISTINCT
+
+SELECT COUNT(DISTINCT author)
+FROM books;
+
+--21.WHERE, AND/OR
+
+SELECT professor_name, salary
+FROM salaries
+WHERE salary BETWEEN 120000 AND 250000;
+
+--22.WHERE, AND/OR
+
+SELECT *
+FROM salaries
+WHERE department = ‘Anthropology’
+OR salary > 150000;
+
+--23.MAX
+
+SELECT MAX(salary)
+FROM salaries
+WHERE department = ‘Computer Science’;
+
+--24.WHERE, Subqueries
+
+SELECT COUNT(professor_name)
+FROM salaries
+WHERE salary > 2 *
+(SELECT MIN(salary)
+FROM salaries
+WHERE department = ‘Political Science’);
+
+--25.INNER JOIN, AND/OR
+
+SELECT b.book_name
+FROM books AS b
+INNER JOIN checked_out AS c
+ON b.book_id = c.book_id
+WHERE c.first_name = ‘Justin’
+AND c.last_name = ‘Lee’;
+
+--26. COALESCE, DISTINCT
+
+SELECT DISTINCT (first_name || ‘ ‘ || last_name) AS full_name
+FROM checked_out;
+
+--27. SUM, GROUP BY
+
+SELECT department, SUM(salary) AS total
+FROM salaries
+GROUP BY department
+ORDER BY total DESC
+LIMIT 1;
+
+--28.AVG, GROUP BY
+
+SELECT department, AVG(Salary) AS avg_salary
+FROM salaries
+GROUP BY department
+ORDER BY avg_salary DESC
+LIMIT 1;
+
+--29.MAX, GROUP BY
+
+SELECT professor_name, department, MAX(salary)
+FROM salaries
+GROUP BY department;
+
+--30.DISTINCT, ORDER BY, LIMIT, Subqueries
+
+SELECT professor_name, salary
+FROM salaries
+WHERE salary IN
+(SELECT DISTINCT salary
+FROM salaries
+ORDER BY salary DESC
+LIMIT 3)
+OR salary IN
+(SELECT DISTINCT salary
+FROM salaries
+ORDER BY salary ASC
+LIMIT 3);
+
+--31.GROUP BY, COUNT
+
+SELECT department, COUNT(professor_name)
+FROM salaries
+GROUP BY department;
+
+--32.GROUP BY, COUNT, ORDER BY, LIMIT
+
+SELECT department, COUNT(professor_name) AS total
+FROM salaries
+GROUP BY department
+ORDER BY total DESC
+LIMIT 1;
+
+
