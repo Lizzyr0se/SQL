@@ -1,0 +1,210 @@
+--leetcode.com
+
+
+--175. Combine Two Tables 
+
+SELECT p.firstname, p.lastname, a.city, a.state
+FROM person AS p
+LEFT JOIN address AS a
+ON p.personid=a.personid;
+
+--181. Employees Earning More Than Their Managers 
+
+SELECT e.name as Employee
+FROM Employee AS e
+JOIN Employee AS e2
+ON e.managerId=e2.id
+WHERE e.salary > e2.salary;
+
+--182. Duplicate Emails 
+
+WITH tempp AS (
+SELECT email, COUNT(email) AS cnt
+FROM person
+GROUP BY email)
+
+SELECT email
+FROM tempp
+WHERE cnt>1;
+
+--183. Customers Who Never Order 
+
+SELECT customers.name AS 'Customers'
+FROM customers
+WHERE customers.id NOT IN 
+(SELECT customerid FROM orders);
+
+--196. Delete Duplicate Email 
+
+DELETE FROM person
+WHERE email IN (
+SELECT email
+FROM (SELECT email, COUNT(email)
+ 	FROM person
+          	GROUP BY email
+         	HAVING COUNT(email)>1
+            AND id NOT IN (
+            	SELECT MIN(id)
+            	FROM person
+            	GROUP BY email)) AS tempp);
+
+--197. Rising Temperature 
+
+WITH tempw AS (
+SELECT *, LAG(temperature, 1) OVER (ORDER BY recorddate ASC) AS ytemp
+FROM weather)
+
+SELECT id
+FROM tempw
+WHERE temperature>ytemp;
+
+--511. Game Play Analysis I 
+
+SELECT player_id, MIN(event_date) AS first_login
+FROM activity
+GROUP BY player_id;
+
+--584. Find Customer Referee 
+
+SELECT name 
+FROM customer
+WHERE referee_id <> 2 
+OR referee_id IS NULL;
+
+--586. Customer Placing the Largest Number of Orders 
+
+SELECT customer_number
+FROM orders
+GROUP BY customer_number
+ORDER BY COUNT(order_number) DESC
+LIMIT 1;
+
+--595. Big Countries
+
+SELECT name, population, area 
+FROM world
+WHERE area >= 3000000 
+OR population >= 25000000;
+
+--596. Classes More Than 5 Students 
+
+WITH tempc AS (
+SELECT class, COUNT(student) AS cnt
+FROM courses
+GROUP BY class)
+
+SELECT class
+FROM tempc
+WHERE cnt >= 5;
+
+--607. Sales Person 
+
+SELECT name
+FROM salesperson
+WHERE sales_id NOT IN (
+SELECT sales_id
+FROM orders
+WHERE com_id = (
+SELECT com_id
+FROM company
+WHERE name = 'RED'));
+
+--620. Not Boring Movies 
+
+SSELECT *
+FROM cinema
+WHERE id%2=1
+AND description <> 'boring'
+ORDER BY rating DESC;
+
+--627. Swap Salary 
+
+UPDATE salary SET sex =
+(CASE WHEN sex = 'm' THEN 'f'
+ELSE 'm'
+END);
+
+--1050. Actors and Directors Who Cooperated At Least Three Times 
+
+SELECT actor_id, director_id
+FROM actordirector
+GROUP BY actor_id, director_id
+HAVING COUNT(timestamp)>2;
+
+--1084. Sales Analysis III 
+
+SELECT p.product_id, p.product_name
+FROM product AS p
+JOIN sales AS s
+ON p.product_id=s.product_id
+WHERE s.sale_date BETWEEN '2019-01-01' AND '2019-03-31'
+AND p.product_id NOT IN (
+SELECT product_id
+FROM sales
+WHERE sale_date NOT BETWEEN '2019-01-01' AND '2019-03-31');
+
+--1141. User Activity for the Past 30 Days I 
+
+SELECT activity_date AS day, COUNT(DISTINCT user_id) AS active_users
+FROM activity
+WHERE activity_date BETWEEN '2019-06-27' AND '2019-07-27'
+GROUP BY day;
+
+--1148. Article Views I 
+
+SELECT DISTINCT author_id AS id
+FROM views
+WHERE author_id=viewer_id
+ORDER BY author_id;
+
+--1179. Reformat Department Table
+
+SELECT id,
+SUM(CASE WHEN month = 'Jan' THEN revenue ELSE NULL END) as Jan_Revenue,
+SUM(CASE WHEN month = 'Feb' THEN revenue ELSE NULL END) as Feb_Revenue,
+SUM(CASE WHEN month = 'Mar' THEN revenue ELSE NULL END) as Mar_Revenue,
+SUM(CASE WHEN month = 'Apr' THEN revenue ELSE NULL END) as Apr_Revenue,
+SUM(CASE WHEN month = 'May' THEN revenue ELSE NULL END) as May_Revenue,
+SUM(CASE WHEN month = 'Jun' THEN revenue ELSE NULL END) as Jun_Revenue,
+SUM(CASE WHEN month = 'Jul' THEN revenue ELSE NULL END) as Jul_Revenue,
+SUM(CASE WHEN month = 'Aug' THEN revenue ELSE NULL END) as Aug_Revenue,
+SUM(CASE WHEN month = 'Sep' THEN revenue ELSE NULL END) as Sep_Revenue,
+SUM(CASE WHEN month = 'Oct' THEN revenue ELSE NULL END) as Oct_Revenue,
+SUM(CASE WHEN month = 'Nov' THEN revenue ELSE NULL END) as Nov_Revenue,
+SUM(CASE WHEN month = 'Dec' THEN revenue ELSE NULL END) as Dec_Revenue
+FROM department
+GROUP BY id;
+
+--1407. Top Travellers
+
+SELECT u.name AS name, COALESCE(SUM(r.distance), 0) AS travelled_distance
+FROM rides AS r
+RIGHT JOIN users AS u
+ON r.user_id=u.id
+GROUP BY u.name
+ORDER BY travelled_distance DESC, u.name ASC;
+
+--1527. Patients With a Condition
+
+SELECT *
+FROM patients
+WHERE conditions LIKE '%DIAB1%';
+
+--1667. Fix Names in a Table
+
+SELECT user_id, CONCAT(LEFT(UPPER(name),1), RIGHT(LOWER(name),LENGTH(name)-1)) AS name
+FROM users;
+
+--1757. Recyclable and Low Fat Products 
+
+SELECT product_id 
+FROM products
+WHERE low_fats = 'Y' 
+AND recyclable = 'Y';
+
+--1873. Calculate Special Bonus
+
+SELECT employee_id, 
+(CASE WHEN employee_id%2=1 AND LEFT(name,1)<>'M' THEN salary
+ELSE 0 END) AS bonus
+FROM employees;
